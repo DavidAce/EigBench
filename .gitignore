@@ -1,0 +1,11 @@
+cmake-build*/
+.idea/
+output/
+build/
+.vscode/
+tmp/
+libs/
+doxygen_log.txt
+test*.cfg
+*.log
+*.err
