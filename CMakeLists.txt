@@ -30,7 +30,7 @@ include(cmake-modules/debug_msg.cmake)
 
 
 ##################################################################
-### Get operating system properties into a variable            ###
+### Get operating system modes into a variable            ###
 ##################################################################
 set(GET_OS_INFO_CMD lsb_release -a)
 if(${CMAKE_HOST_APPLE})
@@ -188,12 +188,15 @@ include(cmake-modules/Fetch_OpenBLAS.cmake)                 # If MKL is not foun
 include(cmake-modules/FindLAPACKE.cmake)
 include(cmake-modules/Fetch_Eigen3.cmake)                   # Eigen library
 include(cmake-modules/Fetch_Flens.cmake)                    # Flens library
-include(cmake-modules/Fetch_Elemental.cmake)                # Elemental library
+#include(cmake-modules/Fetch_Elemental.cmake)                # Elemental library
 #include(cmake-modules/Fetch_HDF5.cmake)                     # HDF5 binary file format for output data_struct.
+include(cmake-modules/Fetch_SuperLU.cmake)                  #
+#include(cmake-modules/Fetch_SuiteSparse.cmake)              #
 include(cmake-modules/Fetch_Arpack-ng.cmake)                # Iterative Eigenvalue solver for a few eigenvalues/eigenvectors using Arnoldi method.
 include(cmake-modules/Fetch_Arpackpp.cmake)                 # C++ frontend for arpack-ng
 include(cmake-modules/Fetch_GSL.cmake)                      # GSL for computing some numerical integrals.
 include(cmake-modules/Fetch_Armadillo.cmake)                # Armadillo library
+#include(cmake-modules/Fetch_PETSc.cmake)                    # PETSc library
 
 
 

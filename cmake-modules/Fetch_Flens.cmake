@@ -11,7 +11,7 @@ else()
     include(ExternalProject)
     ExternalProject_Add(library_FLENS
             GIT_REPOSITORY https://github.com/michael-lehn/FLENS.git
-            GIT_TAG v1.1.0
+            GIT_TAG public
             GIT_PROGRESS 1
             PREFIX "${INSTALL_DIRECTORY}/flens"
             CMAKE_ARGS
@@ -31,21 +31,8 @@ else()
     set(FLENS_INCLUDE_DIR ${INSTALL_DIR}/include)
     add_dependencies(FLENS library_FLENS)
 endif()
-#
-#if(BLAS_LIBRARIES)
-#    set(FLENS_COMPILER_FLAGS  ) # -Wno-parentheses
-#    if("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" )
-#        #        list(APPEND FLENS_COMPILER_FLAGS) # -Wno-unused-but-set-variable
-#    endif()
-#    if(MKL_FOUND)
-#        list(APPEND FLENS_COMPILER_FLAGS -DEIGEN_USE_MKL_ALL)
-#        message(STATUS "Flens will use MKL")
-#    else()
-#        list(APPEND FLENS_COMPILER_FLAGS -DEIGEN_USE_BLAS)
-#        list(APPEND FLENS_COMPILER_FLAGS -DEIGEN_USE_LAPACKE)
-#        message(STATUS "Flens will use BLAS")
-#    endif()
-#endif()
+
+
 
 set_target_properties(FLENS PROPERTIES
         INTERFACE_INCLUDE_DIRECTORY     "${FLENS_INCLUDE_DIR}"

@@ -15,19 +15,19 @@ public:
     benchmark_eigen3() = default;
 
     template <typename Derived>
-    Eigen::Array<typename Derived::Scalar, Eigen::Dynamic, Eigen::Dynamic> eig_sym_Eigen(const Eigen::EigenBase<Derived> &matrix, class_tic_toc &timer){
+    auto eig_sym_Eigen(const Eigen::EigenBase<Derived> &matrix, class_tic_toc &timer){
         timer.tic();
         Eigen::SelfAdjointEigenSolver<Derived> es(matrix);
         timer.toc();
-        return es.eigenvectors();
+        return std::make_pair(es.eigenvalues(),es.eigenvectors());
     }
 
     template <typename Derived>
-    Eigen::Array<typename Derived::Scalar, Eigen::Dynamic, Eigen::Dynamic> eig_gen_Eigen(const Eigen::EigenBase<Derived> &matrix, class_tic_toc &timer){
+    auto eig_gen_Eigen(const Eigen::EigenBase<Derived> &matrix, class_tic_toc &timer){
         timer.tic();
         Eigen::EigenSolver<Derived> es(matrix);
         timer.toc();
-        return es.eigenvectors();
+        return std::make_pair(es.eigenvalues(), es.eigenvectors());
     }
 
 };

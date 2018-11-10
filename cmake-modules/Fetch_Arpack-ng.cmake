@@ -64,35 +64,35 @@ else()
             PREFIX              "${INSTALL_DIRECTORY}/arpack-ng"
             UPDATE_COMMAND ""
             BUILD_IN_SOURCE 1
-#            CONFIGURE_COMMAND
-#                ./bootstrap && export INTERFACE64=1 &&
-#                ./configure INTERFACE64=1
-#                            --prefix=<INSTALL_DIR>
-#                            --enable-silent-rules
-#                            --with-blas=${BLAS_LIBRARIES_GENERATOR}
-#                            --with-lapack=${LAPACK_LIBRARIES_GENERATOR}
-#
-#            BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} && ${CMAKE_MAKE_PROGRAM} check
-#            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
+            CONFIGURE_COMMAND
+                ./bootstrap && export INTERFACE64=0 &&
+                ./configure INTERFACE64=0
+                            --prefix=<INSTALL_DIR>
+                            --enable-silent-rules
+                            --with-blas=${BLAS_LIBRARIES_GENERATOR}
+                            --with-lapack=${LAPACK_LIBRARIES_GENERATOR}
 
-            CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-            -DCMAKE_INSTALL_MESSAGE=NEVER #Avoid unnecessary output to console
-            -DCMAKE_C_FLAGS=-w -m64 -fPIC
-            -DCMAKE_Fortran_FLAGS=-w -m64 -fPIC
-            -DEXAMPLES=ON
-            -DCMAKE_BUILD_TYPE=Release
-            -DMPI=OFF
-            -DINTERFACE64=OFF
-            -DBUILD_SHARED_LIBS=${ARPACK_SHARED}
-            -DBLAS_LIBRARIES=${BLAS_LIBRARIES_GENERATOR};
-            -DLAPACK_LIBRARIES=${LAPACK_LIBRARIES_GENERATOR}
-            -DEXTRA_LDLAGS=${FC_LDLAGS_GENERATOR}
+            BUILD_COMMAND ${CMAKE_MAKE_PROGRAM} && ${CMAKE_MAKE_PROGRAM} check
+            INSTALL_COMMAND ${CMAKE_MAKE_PROGRAM} install
             DEPENDS blas lapack gfortran
+
+#            CMAKE_ARGS
+#            -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+#            -DCMAKE_INSTALL_MESSAGE=NEVER #Avoid unnecessary output to console
+#            -DCMAKE_C_FLAGS=-w -m64 -fPIC
+#            -DCMAKE_Fortran_FLAGS=-w -m64 -fPIC
+#            -DEXAMPLES=ON
+#            -DCMAKE_BUILD_TYPE=Release
+#            -DMPI=OFF
+#            -DINTERFACE64=OFF
+#            -DBUILD_SHARED_LIBS=${ARPACK_SHARED}
+#            -DBLAS_LIBRARIES=${BLAS_LIBRARIES_GENERATOR};
+#            -DLAPACK_LIBRARIES=${LAPACK_LIBRARIES_GENERATOR}
+#            -DEXTRA_LDLAGS=${FC_LDLAGS_GENERATOR}
             )
     ExternalProject_Get_Property(library_ARPACK INSTALL_DIR)
     set(ARPACK_INCLUDE_DIRS ${INSTALL_DIR}/include)
-    add_library(arpack STATIC IMPORTED)
+    add_library(arpack UNKNOWN IMPORTED)
     set_target_properties(arpack
             PROPERTIES
             IMPORTED_LOCATION "${INSTALL_DIR}/lib/libarpack${CUSTOM_SUFFIX}"
