@@ -8,7 +8,7 @@
 #include "arpack_base.h"
 #include "matrix_product_dense.h"
 #include "matrix_product_sparse.h"
-#include "nmspc_arpack_extra.h"
+#include "general/nmspc_eigutils.h"
 
 template<typename MatrixType>
 class arpack_custom_op : public arpack_base<MatrixType> {

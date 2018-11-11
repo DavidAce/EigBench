@@ -20,7 +20,7 @@ public:
         rn::seed(seed);
         class_tic_toc timer(true,5,"");
         matrix_generator matgen;
-        std::vector<std::tuple<int,double,int,double,double,double,double>>    results;
+        std::vector<std::tuple<int,double,int,double,double,double,double,double,double>>    results;
         for (auto L : L_list){
             for (auto s : sparcity_list) {
                 for(auto nev : nev_list) {
@@ -28,7 +28,7 @@ public:
 //                    Eigen::ArrayXd iterations(R);
                     for (int r = 0; r < reps; r++) {
                         auto matrix = matgen.make_symmetric_dense<double>(L, s,false);
-                        int ncv = std::min((int)matrix.rows()/2, nev*8);
+//                        int ncv = std::min((int)matrix.rows()/2, nev*8);
                         mat D(matrix.data(), L,L,false, false);
                         sp_mat S(D);
                         vec eigval;
@@ -44,7 +44,7 @@ public:
                     double nan = std::numeric_limits<double>::quiet_NaN();
 //                    double iavg = iterations.mean();
 //                    double istd = std::sqrt((iterations - iavg).square().sum()/(iterations.size()-1));
-                    results.emplace_back(L,s,nev,tavg, tstd, nan, nan);
+                    results.emplace_back(L,s,nev,tavg, tstd, nan, nan,nan,nan);
                 }
             }
         }

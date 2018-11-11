@@ -8,6 +8,7 @@
 #include <complex>
 #include <Eigen/Core>
 #include "matrix_generator.h"
+#include <general/nmspc_eigutils.h>
 
 class matrix_container{
 public:
@@ -52,6 +53,20 @@ public:
     const auto & get_real_nsym(size_t r, size_t s, size_t l){return matrix_real_nsym_list[r + s*R + l * R*S];}
     const auto & get_cplx_symm(size_t r, size_t s, size_t l){return matrix_cplx_symm_list[r + s*R + l * R*S];}
     const auto & get_cplx_nsym(size_t r, size_t s, size_t l){return matrix_cplx_nsym_list[r + s*R + l * R*S];}
+
+    template<
+            eigutils::eigSetting::Type type,
+            eigutils::eigSetting::Form form>
+    const auto & get_matrix(size_t r, size_t s, size_t l){
+        using namespace eigutils::eigSetting;
+        if constexpr (type ==  Type::REAL and form == Form::SYMMETRIC )   {return matrix_real_symm_list[r + s*R + l * R*S];}
+        if constexpr (type ==  Type::REAL and form == Form::NONSYMMETRIC ){return matrix_real_nsym_list[r + s*R + l * R*S];}
+        if constexpr (type ==  Type::CPLX and form == Form::SYMMETRIC )   {return matrix_cplx_symm_list[r + s*R + l * R*S];}
+        if constexpr (type ==  Type::CPLX and form == Form::NONSYMMETRIC ){return matrix_cplx_nsym_list[r + s*R + l * R*S];}
+    }
+
+
+
 //    const auto & get_rows     (size_t r, size_t s, size_t l){return matrix_real_nsym_list[r + s*R + l * R*S].rows();}
 //    const auto & get_sparcity (size_t r, size_t s, size_t l){return matrix_real_symm_list[r + s*R + l * R*S];}
 

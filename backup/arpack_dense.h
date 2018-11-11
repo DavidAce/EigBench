@@ -4,6 +4,7 @@
 
 #ifndef ARPACK_DENSE_H
 #define ARPACK_DENSE_H
+
 #include "arpack_base.h"
 #include "nmspc_arpack_extra.h"
 

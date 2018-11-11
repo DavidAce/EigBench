@@ -3,6 +3,7 @@
 //
 #include <assert.h>
 #include "arpack_dense.h"
+#include <general/nmspc_eigsolver_modes.h>
 #include <arpackpp/ardsnsym.h>
 #include <arpackpp/ardscomp.h>
 #include <arpackpp/ardgcomp.h>
@@ -12,7 +13,7 @@
 
 
 
-using namespace arpack_extra::modes;
+using namespace eigsolver_modes;
 
 
 template<typename Scalar>

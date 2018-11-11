@@ -7,7 +7,7 @@
 #include <general/class_tic_toc.h>
 #include <array>
 #include <vector>
-#include "nmspc_arpack_extra.h"
+#include "general/nmspc_eigutils.h"
 
 #define profile_matrix_product_hamiltonian 0
 

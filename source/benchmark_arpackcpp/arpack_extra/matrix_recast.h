@@ -7,7 +7,7 @@
 
 #include <complex>
 #include <vector>
-#include "nmspc_arpack_extra.h"
+#include "general/nmspc_eigutils.h"
 #include "matrix_product_dense.h"
 #include "matrix_product_sparse.h"
 
@@ -29,10 +29,10 @@ private:
     void check_if_sparse();
     void check_if_hermitian();
 
-//    arpack_extra::DenseType<double>                matrix_real_dense;
-//    arpack_extra::DenseType<std::complex<double>>  matrix_cplx_dense;
-//    arpack_extra::SparseType<double>               matrix_real_sparse;
-//    arpack_extra::SparseType<std::complex<double>> matrix_cplx_sparse;
+//    eigutils::DenseType<double>                matrix_real_dense;
+//    eigutils::DenseType<std::complex<double>>  matrix_cplx_dense;
+//    eigutils::SparseType<double>               matrix_real_sparse;
+//    eigutils::SparseType<std::complex<double>> matrix_cplx_sparse;
 //    DenseMatrixProduct<double>                matrix_real_dense;
 //    DenseMatrixProduct<std::complex<double>>  matrix_cplx_dense;
 //    SparseMatrixProduct<double>               matrix_real_sparse;

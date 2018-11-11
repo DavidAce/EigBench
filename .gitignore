@@ -1,4 +1,5 @@
 cmake-build*/
+results/
 .idea/
 output/
 build/

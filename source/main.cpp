@@ -20,7 +20,7 @@
 #include <Eigen/Eigenvalues>
 #include <Eigen/Sparse>
 #include <Eigen/LU>
-#include <general/class_tic_toc.h>
+
 //#include <El.hpp>
 #include <omp.h>
 #ifdef OpenBLAS_AVAILABLE
@@ -34,8 +34,8 @@
 #include <mkl.h>
 #endif
 
-
-#include <unsupported/Eigen/KroneckerProduct>
+#include <general/nmspc_eigutils.h>
+#include <general/class_tic_toc.h>
 #include <benchmark_armadillo/benchmark_armadillo.h>
 #include <benchmark_arpackcpp/benchmark_arpackcpp.h>
 #include <benchmark_eigen3/benchmark_eigen3.h>
@@ -44,75 +44,10 @@
 #include <general/matrix_generator.h>
 #include <general/matrix_container.h>
 #undef complex
-
 using namespace std::complex_literals;
 
 
 
-
-
-//
-//
-//Eigen::ArrayXcd eig_Flens(Eigen::MatrixXd matrix, class_tic_toc &timer){
-//    // Read the example at
-//    // http://apfel.mathematik.uni-ulm.de/~lehn/flens/flens/examples/tut04-page04.html
-//    using namespace std;
-//    using namespace flens;
-//    int L = matrix.rows();
-//    assert(L == matrix.cols());
-//    typedef GeMatrix<FullStorage<double, ColMajor> >   Matrix;
-//    typedef DenseVector<Array<double> >                Vector;
-//
-//    Matrix   VL(L, L), VR(L, L);// Left and right eigenvectors
-//    Vector   wr(L), wi(L);      // The real and imaginary parts of the eigenvalues
-//
-//    typedef FullStorageView<double, ColMajor>  FSView;
-//    typedef GeMatrix<FSView>                   GeMatrixView;
-//    GeMatrixView  A    = FSView(L, L, matrix.data(), L);
-//    timer.tic();
-//    flens::lapack::ev(true, true, A, wr, wi, VL, VR);
-//    timer.toc();
-//
-//    Eigen::ArrayXcd eigvals(L);
-//    eigvals.real() = Eigen::Map<Eigen::ArrayXd>(wr.data(), L);
-//    eigvals.imag() = Eigen::Map<Eigen::ArrayXd>(wi.data(), L);
-//    return eigvals;
-//}
-
-
-
-
-
-
-
-
-
-template <typename ResType>
-void print_results(std::string header, ResType &results){
-    std::cout << header << std::endl;
-    std::cout << std::setprecision(8)
-              << "      " <<std::setw(6)   << std::left << "L"
-              << "      " <<std::setw(12)  << std::left << "Sparcity"
-              << "      " <<std::setw(6)   << std::left << "Nev"
-              << "      " <<std::setw(18)  << std::left << "Average [seconds]"
-              << "      " <<std::setw(18)  << std::left << "std"
-              << "      " <<std::setw(18)  << std::left << "Average [iter]"
-              << "      " <<std::setw(18)  << std::left << "std"
-              << std::endl;
-    for(auto &res : results){
-        std::cout << std::setprecision(8)
-                  << "      " << std::setw(6)  << std::fixed << std::left << std::get<0>(res)
-                  << "      " << std::setw(12) << std::fixed << std::left << std::get<1>(res)
-                  << "      " << std::setw(6)  << std::fixed << std::left << std::get<2>(res)
-                  << "      " << std::setw(18) << std::fixed << std::left << std::get<3>(res)
-                  << "      " << std::setw(18) << std::fixed << std::left << std::get<4>(res)
-                  << "      " << std::setw(18) << std::fixed << std::left << std::get<5>(res)
-                  << "      " << std::setw(18) << std::fixed << std::left << std::get<6>(res)
-                  << std::endl;
-    }
-    std::cout << std::endl << std::flush;
-
-}
 
 
 int main () {
@@ -129,15 +64,15 @@ int main () {
 
 //    omp_set_num_threads(num_threads);
     Eigen::setNbThreads(num_threads);
-
+    using namespace eigutils::eigSetting;
     using real = double;
     using cplx = std::complex<double>;
     rn::seed(3);
 
-    int reps = 40;
-    std::vector<int>     L_list           = {2048};
+    int reps = 10;
+    std::vector<int>     L_list           = {256,512,1024};
     std::vector<double>  sparcity_list    = {0.01, 0.1, 0.5};
-    std::vector<int>     nev_list         = {1,8};
+    std::vector<int>     nev_list         = {1,4,8,32};
     std::cout << "Generating matrices for " << reps << " iterations..." << std::endl;
     matrix_container matrices(L_list,sparcity_list,reps);
 
@@ -146,20 +81,37 @@ int main () {
     std::cout << "Eigenvectors: true" << std::endl;
     std::cout << "Running benchmark." << std::endl;
 
-    auto results_arpackcpp_real_symm_dense   = bench_arpackcpp.run_eigs_real_symm_dense  (matrices,nev_list);
-    print_results("Arpack++  eigs real symmetric dense"    , results_arpackcpp_real_symm_dense);
+    auto results_arpackcpp_real_symm_dense   = bench_arpackcpp.run_eigs<Type::REAL,Form::SYMMETRIC,Storage::DENSE>  (matrices,nev_list);
+    results_arpackcpp_real_symm_dense.print_results("Arpack++  eigs real symmetric dense");
 
-    auto results_arpackcpp_real_symm_sparse  = bench_arpackcpp.run_eigs_real_symm_sparse (matrices,nev_list);
-    print_results("Arpack++  eigs real symmetric sparse"   , results_arpackcpp_real_symm_sparse);
+    auto results_arpackcpp_real_symm_sparse  = bench_arpackcpp.run_eigs<Type::REAL,Form::SYMMETRIC,Storage::SPARSE> (matrices,nev_list);
+    results_arpackcpp_real_symm_sparse.print_results("Arpack++  eigs real symmetric sparse");
 
-    auto results_arpackcpp_real_nsym_dense   = bench_arpackcpp.run_eigs_real_nsym_dense  (matrices,nev_list);
-    print_results("Arpack++  eigs real nonsymmetric dense" , results_arpackcpp_real_nsym_dense);
+    auto results_arpackcpp_real_nsym_dense   = bench_arpackcpp.run_eigs<Type::REAL,Form::NONSYMMETRIC,Storage::DENSE>  (matrices,nev_list);
+    results_arpackcpp_real_nsym_dense.print_results("Arpack++  eigs real nonsymmetric dense" );
 
-    auto results_arpackcpp_real_nsym_sparse  = bench_arpackcpp.run_eigs_real_nsym_sparse (matrices,nev_list);
-    print_results("Arpack++  eigs real nonsymmetric sparse", results_arpackcpp_real_nsym_sparse);
+    auto results_arpackcpp_real_nsym_sparse  = bench_arpackcpp.run_eigs<Type::REAL,Form::NONSYMMETRIC,Storage::SPARSE> (matrices,nev_list);
+    results_arpackcpp_real_nsym_sparse.print_results("Arpack++  eigs real nonsymmetric sparse");
 
-    auto results_armadillo_real_symm_sparse  = bench_armadillo.run_eigs_real_symm_sparse(reps,nev_list,L_list,sparcity_list);
-    print_results("Armadillo eigs real symmetric dense"    , results_armadillo_real_symm_sparse);
+    auto results_arpackcpp_cplx_symm_dense   = bench_arpackcpp.run_eigs<Type::CPLX,Form::SYMMETRIC,Storage::DENSE>  (matrices,nev_list);
+    results_arpackcpp_cplx_symm_dense.print_results("Arpack++  eigs cplx symmetric dense" );
+
+    auto results_arpackcpp_cplx_symm_sparse  = bench_arpackcpp.run_eigs<Type::CPLX,Form::SYMMETRIC,Storage::SPARSE> (matrices,nev_list);
+    results_arpackcpp_cplx_symm_sparse.print_results("Arpack++  eigs cplx symmetric sparse");
+
+    auto results_arpackcpp_cplx_nsym_dense   = bench_arpackcpp.run_eigs<Type::CPLX,Form::NONSYMMETRIC,Storage::DENSE>  (matrices,nev_list);
+    results_arpackcpp_cplx_nsym_dense.print_results("Arpack++  eigs cplx nonsymmetric dense" );
+
+    auto results_arpackcpp_cplx_nsym_sparse  = bench_arpackcpp.run_eigs<Type::CPLX,Form::NONSYMMETRIC,Storage::SPARSE> (matrices,nev_list);
+    results_arpackcpp_cplx_nsym_sparse.print_results("Arpack++  eigs cplx nonsymmetric sparse");
+
+
+
+
+
+
+//    auto results_armadillo_cplx_symm_sparse  = bench_armadillo.run_eigs_real_symm_sparse(reps,nev_list,L_list,sparcity_list);
+//    print_results("Armadillo eigs real symmetric dense"    , results_armadillo_cplx_symm_sparse);
 
 
     return 0;

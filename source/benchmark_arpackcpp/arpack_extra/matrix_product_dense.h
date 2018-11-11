@@ -11,10 +11,10 @@
 #endif
 
 
-#include "nmspc_arpack_extra.h"
 #include <iostream>
 #include <Eigen/Core>
 #include <Eigen/LU>
+#include "general/nmspc_eigutils.h"
 
 
 template <typename Scalar_>
@@ -28,8 +28,8 @@ private:
 
     const MatrixType A_matrix;           // The actual matrix. Given matrices will be copied into this one.
     const int L;                        // The linear matrix dimension
-    arpack_extra::modes::Form form;     // Chooses SYMMETRIC / NONSYMMETRIC mode
-    arpack_extra::modes::Side side;     // Chooses whether to find (R)ight or (L)eft eigenvectors
+    eigutils::eigSetting::Form form;     // Chooses SYMMETRIC / NONSYMMETRIC mode
+    eigutils::eigSetting::Side side;     // Chooses whether to find (R)ight or (L)eft eigenvectors
 
     // Shift-invert mode stuff
     Eigen::PartialPivLU<MatrixType> lu;                         // Object for dense LU decomposition used in shift-invert mode
@@ -43,8 +43,8 @@ public:
     DenseMatrixProduct(
             const Scalar * const A_,
             const int L_,
-            const arpack_extra::modes::Form form_ = arpack_extra::modes::Form::NONSYMMETRIC,
-            const arpack_extra::modes::Side side_ = arpack_extra::modes::Side::R
+            const eigutils::eigSetting::Form form_ = eigutils::eigSetting::Form::NONSYMMETRIC,
+            const eigutils::eigSetting::Side side_ = eigutils::eigSetting::Side::R
 
     ): A_matrix(Eigen::Map<const MatrixType>(A_,L_,L_)),
        L(L_), form(form_), side(side_) {}
@@ -53,8 +53,8 @@ public:
     template<typename Derived>
     explicit DenseMatrixProduct(
             const Eigen::EigenBase<Derived> &matrix_,
-            const arpack_extra::modes::Form form_ = arpack_extra::modes::Form::NONSYMMETRIC,
-            const arpack_extra::modes::Side side_ = arpack_extra::modes::Side::R)
+            const eigutils::eigSetting::Form form_ = eigutils::eigSetting::Form::NONSYMMETRIC,
+            const eigutils::eigSetting::Side side_ = eigutils::eigSetting::Side::R)
             : A_matrix(matrix_), L(A_matrix.rows()), form(form_), side(side_)
     {}
 
@@ -71,11 +71,11 @@ public:
     void set_shift(std::complex<double> sigma_)   {sigmaR=std::real(sigma_);sigmaI=std::imag(sigma_) ;readyShift = true;}
     void set_shift(double               sigma_)   {sigmaR=sigma_, sigmaI = 0.0;readyShift = true;}
     void set_shift(double sigmaR_, double sigmaI_){sigmaR=sigmaR_;sigmaI = sigmaI_ ;readyShift = true;}
-    void set_mode(const arpack_extra::modes::Form form_){form = form_;}
-    void set_side(const arpack_extra::modes::Side side_){side = side_;}
+    void set_mode(const eigutils::eigSetting::Form form_){form = form_;}
+    void set_side(const eigutils::eigSetting::Side side_){side = side_;}
     const MatrixType & get_matrix()const{return A_matrix;}
-    const arpack_extra::modes::Form &get_form()const{return form;}
-    const arpack_extra::modes::Side &get_side()const{return side;}
+    const eigutils::eigSetting::Form &get_form()const{return form;}
+    const eigutils::eigSetting::Side &get_side()const{return side;}
 };
 
 
@@ -113,7 +113,7 @@ void DenseMatrixProduct<Scalar>::FactorOP()
 
 template<typename Scalar>
 void DenseMatrixProduct<Scalar>::MultOPv(Scalar* x_in_ptr, Scalar* x_out_ptr) {
-    using namespace arpack_extra::modes;
+    using namespace eigutils::eigSetting;
     assert(readyFactorOp and "FactorOp() has not been run yet.");
     switch (side){
         case Side::R: {
@@ -137,7 +137,7 @@ void DenseMatrixProduct<Scalar>::MultOPv(Scalar* x_in_ptr, Scalar* x_out_ptr) {
 
 template<typename Scalar>
 void DenseMatrixProduct<Scalar>::MultAx(Scalar* x_in, Scalar* x_out) {
-    using namespace arpack_extra::modes;
+    using namespace eigutils::eigSetting;
     switch (form){
         case Form::NONSYMMETRIC:
             switch (side) {

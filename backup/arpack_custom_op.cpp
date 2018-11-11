@@ -12,7 +12,7 @@
 #include <arpackpp/arscomp.h>
 #include <general/nmspc_type_check.h>
 namespace tc = TypeCheck;
-using namespace arpack_extra::modes;
+using namespace eigutils::eigSetting;
 
 
 
@@ -35,7 +35,7 @@ void arpack_custom_op<MatrixType>::eigs() {
     matrix.set_mode(solverConf.form);
     matrix.set_side(solverConf.side);
     // Calculate shift-inverse mat-vec mult operator by LU decomposition
-    if(solverConf.shift == arpack_extra::modes::Shift::ON){
+    if(solverConf.shift == eigutils::eigSetting::Shift::ON){
         matrix.set_shift(solverConf.sigma);
         matrix.FactorOP();
     }
