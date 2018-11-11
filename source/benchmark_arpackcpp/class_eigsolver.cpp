@@ -40,7 +40,7 @@ void class_eigsolver::conf_init  (const int L,
 
 
     if (ncv <= nev or ncv >= L ){
-        solverConf.eigMaxNcv = std::min(L, nev*4);
+        solverConf.eigMaxNcv = std::min(L, nev*3);
         solverConf.eigMaxNcv = std::max(8, solverConf.eigMaxNcv);
         solverConf.eigMaxNcv = std::min(L, solverConf.eigMaxNcv);
     }

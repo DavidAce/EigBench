@@ -136,7 +136,6 @@ void class_eigsolver::eigs_auto   (const Scalar *matrix_data,
             solver.eigs();
         }
     }
-
 }
 
 
