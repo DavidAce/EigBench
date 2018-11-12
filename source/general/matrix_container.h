@@ -30,24 +30,79 @@ public:
         matrix_generator matgen;
         L = (int)L_list.size();
         S = (int)sparcity_list.size();
-        matrix_real_symm_list.resize(R *L * S);
-        matrix_real_nsym_list.resize(R *L * S);
-        matrix_cplx_symm_list.resize(R *L * S);
-        matrix_cplx_nsym_list.resize(R *L * S);
-        int i = 0;
-        for(auto L : L_list){
-            for (auto s: sparcity_list) {
-                for (int r = 0 ; r < R; r++) {
-                    matrix_real_symm_list[i] = matgen.make_symmetric_dense<double>(L, s);
-                    matrix_real_nsym_list[i] = matgen.make_nonsymmetric_dense<double>(L, s);
-                    matrix_cplx_symm_list[i] = matgen.make_symmetric_dense < std::complex < double >> (L, s);
-                    matrix_cplx_nsym_list[i] = matgen.make_nonsymmetric_dense < std::complex < double >> (L, s);
-                    i++;
+    }
+
+    void clear_all(){
+        matrix_real_symm_list.clear();
+        matrix_real_nsym_list.clear();
+        matrix_cplx_symm_list.clear();
+        matrix_cplx_nsym_list.clear();
+    }
+
+    template<eigutils::eigSetting::Type type,
+             eigutils::eigSetting::Form form>
+    void generate_matrices(){
+        using namespace eigutils::eigSetting;
+        clear_all();
+        matrix_generator matgen;
+        if constexpr(type == Type::REAL and form == Form::SYMMETRIC){
+            std::cout << "Generating " << R *L * S << " real dense symmetric matrices..." << std::endl;
+            int i = 0;
+            matrix_real_symm_list.resize(R *L * S);
+            for(auto L : L_list){
+                for (auto s: sparcity_list) {
+                    for (int r = 0 ; r < R; r++) {
+                        matrix_real_symm_list[i] = matgen.make_symmetric_dense<double>(L, s);
+                        i++;
+                    }
                 }
             }
         }
-    }
 
+        if constexpr(type == Type::REAL and form == Form::NONSYMMETRIC){
+            std::cout << "Generating " << R *L * S << " real dense nonsymmetric matrices..." << std::endl;
+            int i = 0;
+            matrix_real_nsym_list.resize(R *L * S);
+            for(auto L : L_list){
+                for (auto s: sparcity_list) {
+                    for (int r = 0 ; r < R; r++) {
+                        matrix_real_nsym_list[i] = matgen.make_nonsymmetric_dense<double>(L, s);
+                        i++;
+                    }
+                }
+            }
+        }
+
+        if constexpr(type == Type::CPLX and form == Form::SYMMETRIC){
+            std::cout << "Generating " << R *L * S << " cplx dense symmetric matrices..." << std::endl;
+            int i = 0;
+            matrix_cplx_symm_list.resize(R *L * S);
+            for(auto L : L_list){
+                for (auto s: sparcity_list) {
+                    for (int r = 0 ; r < R; r++) {
+                        matrix_cplx_symm_list[i] = matgen.make_symmetric_dense < std::complex < double >> (L, s);
+                        i++;
+                    }
+                }
+            }
+        }
+
+        if constexpr(type == Type::CPLX and form == Form::NONSYMMETRIC){
+            std::cout << "Generating " << R *L * S << " cplx dense nonsymmetric matrices..." << std::endl;
+            int i = 0;
+            matrix_cplx_nsym_list.resize(R *L * S);
+            for(auto L : L_list){
+                for (auto s: sparcity_list) {
+                    for (int r = 0 ; r < R; r++) {
+                        matrix_cplx_nsym_list[i] = matgen.make_nonsymmetric_dense < std::complex < double >> (L, s);
+                        i++;
+                    }
+                }
+            }
+        }
+
+
+    }
 
     const auto & get_real_symm(size_t r, size_t s, size_t l){return matrix_real_symm_list[r + s*R + l * R*S];}
     const auto & get_real_nsym(size_t r, size_t s, size_t l){return matrix_real_nsym_list[r + s*R + l * R*S];}

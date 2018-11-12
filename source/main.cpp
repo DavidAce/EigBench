@@ -70,39 +70,41 @@ int main () {
     rn::seed(3);
 
     int reps = 10;
-    std::vector<int>     L_list           = {1024,2048};
-    std::vector<double>  sparcity_list    = {0.1,0.5};
-    std::vector<int>     nev_list         = {1,4,8};
-    std::vector<int>     ncv_list         = {8,16,24,32,40,48,56,64,72,80,88,96,104,112,124};
-    std::cout << "Generating matrices for " << reps << " iterations..." << std::endl;
+    std::vector<int>     L_list           = {256,512,1024,2048};
+    std::vector<double>  sparcity_list    = {0.1};
+    std::vector<int>     nev_list         = {1,8,16,32};
+    std::vector<int>     ncv_list         = {8,16,24,32,64,96,128,160,196};
     matrix_container matrices(L_list,sparcity_list,reps);
 
     benchmark_arpackcpp bench_arpackcpp;
     benchmark_armadillo bench_armadillo;
     std::cout << "Eigenvectors: true" << std::endl;
-    std::cout << "Running benchmark." << std::endl;
+    matrices.generate_matrices<Type::REAL, Form::SYMMETRIC>();
+
+    auto results_arpackcpp_real_symm_dense_si   = bench_arpackcpp.run_eigs_shift_invert<Type::REAL,Form::SYMMETRIC,Storage::DENSE>  (matrices,nev_list,ncv_list);
+    results_arpackcpp_real_symm_dense_si.print_results("Arpack++  eigs real symmetric dense w shift invert");
+
+    auto results_arpackcpp_real_symm_sparse_si   = bench_arpackcpp.run_eigs_shift_invert<Type::REAL,Form::SYMMETRIC,Storage::SPARSE>  (matrices,nev_list,ncv_list);
+    results_arpackcpp_real_symm_sparse_si.print_results("Arpack++  eigs real symmetric sparse w shift invert");
+
 
     auto results_arpackcpp_real_symm_dense   = bench_arpackcpp.run_eigs<Type::REAL,Form::SYMMETRIC,Storage::DENSE>  (matrices,nev_list,ncv_list);
     results_arpackcpp_real_symm_dense.print_results("Arpack++  eigs real symmetric dense");
-
     auto results_arpackcpp_real_symm_sparse  = bench_arpackcpp.run_eigs<Type::REAL,Form::SYMMETRIC,Storage::SPARSE> (matrices,nev_list,ncv_list);
     results_arpackcpp_real_symm_sparse.print_results("Arpack++  eigs real symmetric sparse");
-//
+    matrices.generate_matrices<Type::REAL, Form::NONSYMMETRIC>();
     auto results_arpackcpp_real_nsym_dense   = bench_arpackcpp.run_eigs<Type::REAL,Form::NONSYMMETRIC,Storage::DENSE>  (matrices,nev_list,ncv_list);
     results_arpackcpp_real_nsym_dense.print_results("Arpack++  eigs real nonsymmetric dense" );
-
     auto results_arpackcpp_real_nsym_sparse  = bench_arpackcpp.run_eigs<Type::REAL,Form::NONSYMMETRIC,Storage::SPARSE> (matrices,nev_list,ncv_list);
     results_arpackcpp_real_nsym_sparse.print_results("Arpack++  eigs real nonsymmetric sparse");
-
+    matrices.generate_matrices<Type::CPLX, Form::SYMMETRIC>();
     auto results_arpackcpp_cplx_symm_dense   = bench_arpackcpp.run_eigs<Type::CPLX,Form::SYMMETRIC,Storage::DENSE>  (matrices,nev_list,ncv_list);
     results_arpackcpp_cplx_symm_dense.print_results("Arpack++  eigs cplx symmetric dense" );
-
     auto results_arpackcpp_cplx_symm_sparse  = bench_arpackcpp.run_eigs<Type::CPLX,Form::SYMMETRIC,Storage::SPARSE> (matrices,nev_list,ncv_list);
     results_arpackcpp_cplx_symm_sparse.print_results("Arpack++  eigs cplx symmetric sparse");
-
+    matrices.generate_matrices<Type::CPLX, Form::NONSYMMETRIC>();
     auto results_arpackcpp_cplx_nsym_dense   = bench_arpackcpp.run_eigs<Type::CPLX,Form::NONSYMMETRIC,Storage::DENSE>  (matrices,nev_list,ncv_list);
     results_arpackcpp_cplx_nsym_dense.print_results("Arpack++  eigs cplx nonsymmetric dense" );
-
     auto results_arpackcpp_cplx_nsym_sparse  = bench_arpackcpp.run_eigs<Type::CPLX,Form::NONSYMMETRIC,Storage::SPARSE> (matrices,nev_list,ncv_list);
     results_arpackcpp_cplx_nsym_sparse.print_results("Arpack++  eigs cplx nonsymmetric sparse");
 

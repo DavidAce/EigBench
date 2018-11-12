@@ -23,8 +23,8 @@ public:
                    const int ncv,
                    const std::complex<double> sigma            = std::numeric_limits<std::complex<double>>::quiet_NaN(),
                    const eigutils::eigSetting::Type type        = eigutils::eigSetting::Type::REAL,
-                   const eigutils::eigSetting::Form form        = eigutils::eigSetting::Form::NONSYMMETRIC,
-                   const eigutils::eigSetting::Ritz ritz        = eigutils::eigSetting::Ritz::SR,
+                   const eigutils::eigSetting::Form form        = eigutils::eigSetting::Form::SYMMETRIC,
+                   const eigutils::eigSetting::Ritz ritz        = eigutils::eigSetting::Ritz::LM,
                    const eigutils::eigSetting::Side side        = eigutils::eigSetting::Side::R,
                    const eigutils::eigSetting::Storage storage  = eigutils::eigSetting::Storage::DENSE,
                    const bool compute_eigvecs_           = false,
@@ -37,11 +37,10 @@ public:
                    const int L,
                    const int nev,
                    const bool compute_eigvecs_           = false,
-                   const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::SR,
+                   const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::LM,
                    const std::complex<double> sigma      = std::numeric_limits<std::complex<double>>::quiet_NaN(),
                    const eigutils::eigSetting::Side side = eigutils::eigSetting::Side::R,
-                   const bool remove_phase_              = false,
-                   Scalar *residual_                     = nullptr);
+                   const bool remove_phase_              = false);
 
 
     template<eigutils::eigSetting::Storage storage,typename Scalar>
@@ -50,8 +49,8 @@ public:
                const int nev,
                const int ncv,
                const std::complex<double> sigma      = std::numeric_limits<std::complex<double>>::quiet_NaN(),
-               const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::NONSYMMETRIC,
-               const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::SR,
+               const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::SYMMETRIC,
+               const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::LM,
                const eigutils::eigSetting::Side side = eigutils::eigSetting::Side::R,
                const bool compute_eigvecs_           = false,
                const bool remove_phase_              = false,
@@ -59,17 +58,32 @@ public:
 
 
     template<typename Scalar>
-    void eigs_dense(const  Scalar *matrix,
+    void eigs_dense(const Scalar *matrix,
                    const int L,
                    const int nev,
                    const int ncv,
                    const std::complex<double> sigma      = std::numeric_limits<std::complex<double>>::quiet_NaN(),
-                   const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::NONSYMMETRIC,
-                   const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::SR,
+                   const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::SYMMETRIC,
+                   const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::LM,
                    const eigutils::eigSetting::Side side = eigutils::eigSetting::Side::R,
                    const bool compute_eigvecs_           = false,
                    const bool remove_phase_              = false,
                    Scalar *residual_                     = nullptr);
+
+
+    template<typename Scalar>
+    void eigs_dense(DenseMatrixProduct<Scalar> &matrix,
+                    const int nev,
+                    const int ncv,
+                    const std::complex<double> sigma      = std::numeric_limits<std::complex<double>>::quiet_NaN(),
+                    const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::SYMMETRIC,
+                    const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::LM,
+                    const eigutils::eigSetting::Side side = eigutils::eigSetting::Side::R,
+                    const bool compute_eigvecs_           = false,
+                    const bool remove_phase_              = false,
+                    Scalar *residual_                     = nullptr);
+
+
 
     template<typename Scalar>
     void eigs_sparse(const Scalar *matrix,
@@ -77,12 +91,28 @@ public:
                      const int nev,
                      const int ncv,
                      const std::complex<double> sigma      = std::numeric_limits<std::complex<double>>::quiet_NaN(),
-                     const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::NONSYMMETRIC,
-                     const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::SR,
+                     const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::SYMMETRIC,
+                     const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::LM,
                      const eigutils::eigSetting::Side side = eigutils::eigSetting::Side::R,
                      const bool compute_eigvecs_           = false,
                      const bool remove_phase_              = false,
                      Scalar *residual_                     = nullptr);
+
+
+    template<typename Scalar>
+    void eigs_sparse(SparseMatrixProduct<Scalar> &matrix,
+                    const int nev,
+                    const int ncv,
+                    const std::complex<double> sigma      = std::numeric_limits<std::complex<double>>::quiet_NaN(),
+                    const eigutils::eigSetting::Form form = eigutils::eigSetting::Form::SYMMETRIC,
+                    const eigutils::eigSetting::Ritz ritz = eigutils::eigSetting::Ritz::SR,
+                    const eigutils::eigSetting::Side side = eigutils::eigSetting::Side::R,
+                    const bool compute_eigvecs_           = false,
+                    const bool remove_phase_              = false,
+                    Scalar *residual_                     = nullptr);
+
+
+
 
 };
 
@@ -99,9 +129,7 @@ void class_eigsolver::eigs_auto   (const Scalar *matrix_data,
                                    const eigutils::eigSetting::Ritz ritz ,
                                    const std::complex<double> sigma      ,
                                    const eigutils::eigSetting::Side side ,
-                                   const bool remove_phase_              ,
-                                   Scalar *residual_
-)
+                                   const bool remove_phase_              )
 {
     using namespace eigutils::eigSetting;
     matrix_recast<Scalar> matRecast(matrix_data,L);
@@ -197,6 +225,30 @@ void class_eigsolver::eigs_dense   (const Scalar *matrix,
 
 
 template<typename Scalar>
+void class_eigsolver::eigs_dense   (DenseMatrixProduct<Scalar> &matrix_dense,
+                                    const int nev,
+                                    const int ncv,
+                                    const std::complex<double> sigma,
+                                    const eigutils::eigSetting::Form form,
+                                    const eigutils::eigSetting::Ritz ritz,
+                                    const eigutils::eigSetting::Side side,
+                                    const bool compute_eigvecs_,
+                                    const bool remove_phase_,
+                                    Scalar *residual_)
+{
+    using namespace eigutils::eigSetting;
+    int L = matrix_dense.rows();
+    bool is_cplx = std::is_same<std::complex<double>,Scalar>::value;
+    Type type = is_cplx ? Type::CPLX : Type::REAL;
+    Storage storage = Storage::DENSE;
+    conf_init(L, nev, ncv, sigma,type,form,ritz,side,storage,compute_eigvecs_,remove_phase_);
+    arpackpp_solver<DenseMatrixProduct<Scalar>> solver(matrix_dense, solverConf, solution);
+    solver.eigs();
+}
+
+
+
+template<typename Scalar>
 void class_eigsolver::eigs_sparse   (const Scalar *matrix,
                                     const int L,
                                     const int nev,
@@ -222,6 +274,27 @@ void class_eigsolver::eigs_sparse   (const Scalar *matrix,
 
 
 
+template<typename Scalar>
+void class_eigsolver::eigs_sparse   (SparseMatrixProduct<Scalar> &matrix_sparse,
+                                     const int nev,
+                                     const int ncv,
+                                     const std::complex<double> sigma,
+                                     const eigutils::eigSetting::Form form,
+                                     const eigutils::eigSetting::Ritz ritz,
+                                     const eigutils::eigSetting::Side side,
+                                     const bool compute_eigvecs_,
+                                     const bool remove_phase_,
+                                     Scalar *residual_)
+{
+    using namespace eigutils::eigSetting;
+    int L = matrix_sparse.rows();
+    bool is_cplx = std::is_same<std::complex<double>,Scalar>::value;
+    Type type = is_cplx ? Type::CPLX : Type::REAL;
+    Storage storage = Storage::SPARSE;
+    conf_init(L, nev, ncv, sigma,type,form,ritz,side,storage,compute_eigvecs_,remove_phase_);
+    arpackpp_solver<SparseMatrixProduct<Scalar>> solver(matrix_sparse, solverConf, solution);
+    solver.eigs();
+}
 
 
 #endif //EIGBENCH_CLASS_EIGSOLVER_ARPACK_2_H

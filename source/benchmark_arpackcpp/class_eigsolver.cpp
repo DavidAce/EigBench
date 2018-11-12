@@ -24,6 +24,7 @@ void class_eigsolver::conf_init  (const int L,
 )
 {
     using namespace eigutils::eigSetting;
+    solution.reset();
     bool is_shifted             = sigma == sigma;
     solverConf.compute_eigvecs  = compute_eigvecs_;
     solverConf.remove_phase     = remove_phase_;
@@ -38,22 +39,28 @@ void class_eigsolver::conf_init  (const int L,
     solverConf.storage          = storage;
 
 
-
-    if (ncv <= nev or ncv >= L ){
-        solverConf.eigMaxNcv = std::min(L, nev*3);
-        solverConf.eigMaxNcv = std::max(8, solverConf.eigMaxNcv);
-        solverConf.eigMaxNcv = std::min(L, solverConf.eigMaxNcv);
+    if (ncv < nev ){
+        if (nev >= 1 and nev <= 16 ){
+            solverConf.eigMaxNcv = 8 + std::ceil((int)(1.5*nev));
+        }
+        else
+        if (nev > 16 and nev <= L ){
+            solverConf.eigMaxNcv = 2*nev;
+        }
     }
 
     if (solverConf.form == Form::NONSYMMETRIC){
         if (solverConf.eigMaxNev == 1) {
             solverConf.eigMaxNev = 2;
         }
-        solverConf.eigMaxNcv = std::min(L, solverConf.eigMaxNcv*2);
-
+    }
+    if (solverConf.eigMaxNcv >= L ){
+        solverConf.eigMaxNcv = (L + nev)  / 2;
     }
 
-
+    assert(solverConf.eigMaxNcv <= L and "Ncv > L");
+    assert(solverConf.eigMaxNcv >= solverConf.eigMaxNev and "Ncv < Nev");
+    assert(solverConf.eigMaxNev <= L and "Nev > L");
     solverConf.confOK = true;
 }
 

@@ -33,7 +33,7 @@ public:
     class_tic_toc t_all;
 
 
-//    void shift_invert_eigvals(Scalar sigma);
+    void shift_invert_eigvals(std::complex<double> sigma);
     void subtract_phase();
     void eigs();
     template <typename Derived>  void find_solution(Derived &solver, int nev);

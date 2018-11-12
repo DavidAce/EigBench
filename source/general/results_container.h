@@ -57,7 +57,7 @@ public:
     void add_entry(int r, int nev,int ncv, int sp, int l, int L, double Sparcity, int Nev, int Ncv, double Time, int Iter, int Ops){
         assert (r       <  R                          and "Too many reps");
         assert(Nev      == nev_list[nev]              and "Nev mismatch");
-        assert(Ncv      == ncv_list[ncv]              and "Ncv mismatch");
+//        assert(Ncv      == ncv_list[ncv]              and "Ncv mismatch");
         assert(Sparcity == matrices.sparcity_list[sp] and "Sparcity mismatch");
         assert(L        == matrices.L_list[l]         and "L mismatch");
         timings(r)      = Time;

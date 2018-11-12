@@ -11,10 +11,14 @@
 #endif
 
 
+
+#include <general/nmspc_eigutils.h>
+#include <general/class_tic_toc.h>
 #include <iostream>
+#include <iomanip>
 #include <Eigen/Core>
 #include <Eigen/LU>
-#include "general/nmspc_eigutils.h"
+#define profile_matrix_product_dense 1
 
 
 template <typename Scalar_>
@@ -27,14 +31,14 @@ public:
 private:
 
     const MatrixType A_matrix;           // The actual matrix. Given matrices will be copied into this one.
-    const int L;                        // The linear matrix dimension
+    const int L;                         // The linear matrix dimension
     eigutils::eigSetting::Form form;     // Chooses SYMMETRIC / NONSYMMETRIC mode
     eigutils::eigSetting::Side side;     // Chooses whether to find (R)ight or (L)eft eigenvectors
 
     // Shift-invert mode stuff
     Eigen::PartialPivLU<MatrixType> lu;                         // Object for dense LU decomposition used in shift-invert mode
-    double sigmaR = std::numeric_limits<double>::quiet_NaN();   // The real part of the shift
-    double sigmaI = std::numeric_limits<double>::quiet_NaN();   // The imag part of the shift
+    double sigmaR = 0.0;   // The real part of the shift
+    double sigmaI = 0.0;   // The imag part of the shift
     bool readyFactorOp = false;                                 // Flag to make sure LU factorization has occurred
     bool readyShift = false;                                    // Flag to make sure
 
@@ -43,7 +47,7 @@ public:
     DenseMatrixProduct(
             const Scalar * const A_,
             const int L_,
-            const eigutils::eigSetting::Form form_ = eigutils::eigSetting::Form::NONSYMMETRIC,
+            const eigutils::eigSetting::Form form_ = eigutils::eigSetting::Form::SYMMETRIC,
             const eigutils::eigSetting::Side side_ = eigutils::eigSetting::Side::R
 
     ): A_matrix(Eigen::Map<const MatrixType>(A_,L_,L_)),
@@ -53,7 +57,7 @@ public:
     template<typename Derived>
     explicit DenseMatrixProduct(
             const Eigen::EigenBase<Derived> &matrix_,
-            const eigutils::eigSetting::Form form_ = eigutils::eigSetting::Form::NONSYMMETRIC,
+            const eigutils::eigSetting::Form form_ = eigutils::eigSetting::Form::SYMMETRIC,
             const eigutils::eigSetting::Side side_ = eigutils::eigSetting::Side::R)
             : A_matrix(matrix_), L(A_matrix.rows()), form(form_), side(side_)
     {}
@@ -68,14 +72,24 @@ public:
     // Various utility functions
     int counter = 0;
     void print()const;
-    void set_shift(std::complex<double> sigma_)   {sigmaR=std::real(sigma_);sigmaI=std::imag(sigma_) ;readyShift = true;}
-    void set_shift(double               sigma_)   {sigmaR=sigma_, sigmaI = 0.0;readyShift = true;}
-    void set_shift(double sigmaR_, double sigmaI_){sigmaR=sigmaR_;sigmaI = sigmaI_ ;readyShift = true;}
+    void set_shift(std::complex<double> sigma_)   {if(readyShift){return;} sigmaR=std::real(sigma_);sigmaI=std::imag(sigma_) ;readyShift = true;}
+    void set_shift(double               sigma_)   {if(readyShift){return;} sigmaR=sigma_, sigmaI = 0.0;readyShift = true;}
+    void set_shift(double sigmaR_, double sigmaI_){if(readyShift){return;} sigmaR=sigmaR_;sigmaI = sigmaI_ ;readyShift = true;}
     void set_mode(const eigutils::eigSetting::Form form_){form = form_;}
     void set_side(const eigutils::eigSetting::Side side_){side = side_;}
     const MatrixType & get_matrix()const{return A_matrix;}
     const eigutils::eigSetting::Form &get_form()const{return form;}
     const eigutils::eigSetting::Side &get_side()const{return side;}
+
+    // Profiling
+    void init_profiling(){
+        t_factorOp.set_properties(profile_matrix_product_dense, 5,"Time FactorOp");
+        t_multOpv.set_properties(profile_matrix_product_dense, 5,"Time MultOpv");
+        t_multax.set_properties(profile_matrix_product_dense, 5,"Time MultAx");
+    }
+    class_tic_toc t_factorOp;
+    class_tic_toc t_multOpv;
+    class_tic_toc t_multax;
 };
 
 
@@ -98,6 +112,7 @@ void DenseMatrixProduct<Scalar>::FactorOP()
  *  Factors P(A-sigma*I) = LU
  */
 {
+    if(readyFactorOp){return;}
     assert(readyShift and "Shift value sigma has not been set.");
     Scalar sigma;
     if constexpr(std::is_same<Scalar,double>::value)
@@ -106,6 +121,9 @@ void DenseMatrixProduct<Scalar>::FactorOP()
     {sigma = std::complex<double>(sigmaR,sigmaI);}
     lu.compute(A_matrix - sigma * MatrixType::Identity(L,L));
     readyFactorOp = true;
+    t_factorOp.toc();
+    std::cout << "Time Factor Op [ms]: " << std::setprecision(3) << t_factorOp.get_last_time_interval() * 1000 << '\n';
+
 }
 
 

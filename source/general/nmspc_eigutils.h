@@ -109,13 +109,19 @@ namespace eigutils{
             int     rows            = 0;
             int     cols            = 0;
             int     iter            = 0;
-            int     nev_found       = 0; // Found eigenvectors. aka cols.
+            int     nev             = 0; // Found eigenvectors. aka cols.
+            int     nev_converged   = 0;
             int     n               = 0; // Linear dimension of the input matrix to diagonalize, aka rows.
             int     counter         = 0;
             int     ncv_used        = 0;
             bool    eigvecs_found   = false;
             bool    eigvals_found   = false;
         } meta;
+        void reset(){
+            eigvecs.clear();
+            eigvals.clear();
+            meta = Meta();
+        }
     };
 
 }

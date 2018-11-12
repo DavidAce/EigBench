@@ -22,12 +22,16 @@ private:
     bool isHermitian;
     double sparcity;
 
+
     const Scalar *matrix_ptr;
+    std::vector<Scalar> matrix_pruned;
+    bool pruned = false;
     int     L;
 
     void check_if_real();
     void check_if_sparse();
     void check_if_hermitian();
+    void recheck_all();
 
 //    eigutils::DenseType<double>                matrix_real_dense;
 //    eigutils::DenseType<std::complex<double>>  matrix_cplx_dense;
@@ -41,9 +45,9 @@ private:
 
 public:
     matrix_recast(const Scalar *matrix_ptr_, int L_);
-
-    DenseMatrixProduct<double>               get_as_real_dense();
-    DenseMatrixProduct<std::complex<double>> get_as_cplx_dense();
+    void prune(double threshold = 1e-14);
+    DenseMatrixProduct<double>                get_as_real_dense();
+    DenseMatrixProduct<std::complex<double>>  get_as_cplx_dense();
     SparseMatrixProduct<double>               get_as_real_sparse();
     SparseMatrixProduct<std::complex<double>> get_as_cplx_sparse();
 
